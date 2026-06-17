@@ -7,28 +7,58 @@ function Stars() {
     const ctx = canvas.getContext('2d')
     canvas.width = window.innerWidth
     canvas.height = window.innerHeight
-    const stars = Array.from({ length: 200 }, () => ({
-      x: Math.random() * canvas.width,
-      y: Math.random() * canvas.height,
-      r: Math.random() * 1.5 + 0.3,
-      alpha: Math.random(),
-      speed: Math.random() * 0.005 + 0.002,
-    }))
+    const NUM = 400
+    const SPEED = 3
+    function makeStar() {
+      const angle = Math.random() * Math.PI * 2
+      const radius = Math.random() * 0.3
+      return {
+        x: Math.cos(angle) * radius,
+        y: Math.sin(angle) * radius,
+        z: Math.random() * 1000,
+        px: 0,
+        py: 0,
+      }
+    }
+    const stars = Array.from({ length: NUM }, makeStar)
     let frame
     function draw() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height)
+      const cx = canvas.width / 2
+      const cy = canvas.height / 2
+      ctx.fillStyle = 'rgba(0,0,0,0.15)'
+      ctx.fillRect(0, 0, canvas.width, canvas.height)
       stars.forEach(s => {
-        s.alpha += s.speed
-        if (s.alpha > 1 || s.alpha < 0) s.speed *= -1
+        s.z -= SPEED
+        if (s.z <= 0) {
+          Object.assign(s, makeStar())
+          s.z = 1000
+        }
+        const k = 600 / s.z
+        const sx = cx + s.x * canvas.width * k
+        const sy = cy + s.y * canvas.height * k
+        const r = Math.max(0, (1 - s.z / 1000) * 2.5)
+        const alpha = Math.min(1, (1 - s.z / 1000) * 1.5)
+        if (s.px && s.py) {
+          ctx.beginPath()
+          ctx.moveTo(s.px, s.py)
+          ctx.lineTo(sx, sy)
+          ctx.strokeStyle = `rgba(180,200,255,${alpha * 0.6})`
+          ctx.lineWidth = r * 0.6
+          ctx.stroke()
+        }
         ctx.beginPath()
-        ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2)
-        ctx.fillStyle = `rgba(255,255,255,${s.alpha})`
+        ctx.arc(sx, sy, r, 0, Math.PI * 2)
+        ctx.fillStyle = `rgba(255,255,255,${alpha})`
         ctx.fill()
+        s.px = sx
+        s.py = sy
       })
       frame = requestAnimationFrame(draw)
     }
+    ctx.fillStyle = '#000'
+    ctx.fillRect(0, 0, canvas.width, canvas.height)
     draw()
-    const resize = () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight }
+    const resize = () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; ctx.fillStyle = '#000'; ctx.fillRect(0, 0, canvas.width, canvas.height) }
     window.addEventListener('resize', resize)
     return () => { cancelAnimationFrame(frame); window.removeEventListener('resize', resize) }
   }, [])
