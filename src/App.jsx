@@ -50,13 +50,13 @@ const KUNDEN = [
 ]
 
 function randH() {
-  return (Math.random() * 99).toFixed(1)
+  return (Math.random() * 44.9 + 0.1).toFixed(1)
 }
 
 function getColor(val) {
   const n = parseFloat(val)
-  if (n >= 66) return '#f87171'
-  if (n >= 33) return '#fbbf24'
+  if (n >= 30) return '#f87171'
+  if (n >= 15) return '#fbbf24'
   return '#34d399'
 }
 
